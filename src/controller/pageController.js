@@ -8,20 +8,22 @@ function render(response, target, data = {}) {
 
 export function renderRoot(request, response) {
   const chats = db.chats.listChats();
-  render(response, 'root', { chats });
+  render(response, 'root', { chats, iframePage: '/chat' });
 }
 
 export function renderLogin(request, response) {
-  render(response, 'login', { 
-    error: request.error || null,
-    firstTime: db.settings.get('password')
+  const error = request.session.error || null;
+  delete request.session.error;
+  render(response, 'login', {
+    error,
+    firstTime: !db.settings.has('password'),
   });
 }
 
 export function renderChat(request, response) {
   const { chat_id } = request.params;
   if (!chat_id) return render(response, 'chat');
-  const chat = db.chats.getChatById(chat_id);
+  const chat = db.chats.getChat(chat_id);
   render(response, 'chat', { chat });
 }
 
