@@ -55,6 +55,10 @@ export default class ChatModule {
     return { ...chat, messages };
   }
 
+  getChatById(chat_id) {
+    return this.getChat(chat_id);
+  }
+
   listChats() {
     return this.db.prepare(`
       SELECT * FROM chats ORDER BY created_at DESC
@@ -70,6 +74,10 @@ export default class ChatModule {
   exists(chat_id) {
     const row = this.db.prepare(`SELECT 1 FROM chats WHERE id = ?`).get(chat_id);
     return !!row;
+  }
+
+  doesExist(chat_id) {
+    return this.exists(chat_id);
   }
 
   #getTableName(chat_id) {

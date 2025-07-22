@@ -1,4 +1,4 @@
-section#chat-container.flex.flex-col.items-center.justify-start.space-y-4.pb-32
+section#chat.flex.flex-col.items-center.justify-start.space-y-4.pb-32
   .w-full.max-w-2xl.space-y-2
     each message in chat.messages 
       .p-4.rounded-md(
@@ -63,11 +63,10 @@ script.
 
       const chunks = buffer.split('\n\n');
       buffer = chunks.pop();
-      finalResponse = '';
       for (const chunk of chunks) {
         if (chunk.startsWith('data:')) {
           const data = JSON.parse(chunk.replace('data:', ''));
-          finalRespose += data.message.content;
+          finalResponse += data.message.content;
         }
       }
       updateAIResponse(finalResponse);
