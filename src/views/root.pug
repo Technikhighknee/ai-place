@@ -1,0 +1,33 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Jason's AI Place
+    link(rel="stylesheet" href="/static/styles/layout.css")
+    script(src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4")
+  body(class="min-h-screen bg-gray-900 text-gray-200 relative")
+    .flex.min-h-screen 
+      aside(class="w-64 bg-gray-800 p-4")
+        nav(class="flex flex-col space-y-2")
+          a(href="/chat" class="font-bold text-blue-400 hover:underline" target="main") New Chat 
+          hr(class="my-2 border-gray-600")
+          each chat in chats 
+            a(
+              href=`/chat/${chat.id}`,
+              target="main",
+              class="text-gray-300 hover:text-white truncate"
+            ) #{chat.title || 'Untitled Chat'}
+      iframe#main-frame(
+        src=iframePage
+        class="flex-1 h-full border-0 bg-transparent",
+        name="main"
+      )
+      script. 
+        const links = document.querySelectorAll('a[target]="main"');
+        links.forEach(link => {
+          link.addEventListener('click', e => {
+            e.preventDefault();
+            document.getElementById('main-frame').src = link.href;
+          });
+        });

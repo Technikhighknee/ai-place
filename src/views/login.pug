@@ -1,0 +1,26 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Jason's AI Place
+    link(rel="stylesheet" href="/static/styles/login.css")
+    script(src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4")
+  body 
+    form(action="/auth/login" method="post")
+      label(for="password") Password 
+      input(type="password" name="password" required)
+      if (firstTime)
+        label(for="confirmPassword") Confirm password
+        input#confirmPassword(type="password" name="confirmPassword" required)   
+      input(type="submit" value="Submit")
+    if firstTime
+      script.
+        document.getElementById('confirmPassword').addEventListener('input',
+        function() {
+          const password = document.getElementById('password').value;
+          const confirmPassword = this.value;
+          password !== confirmPassword 
+            ? this.setCustomValidity('Passwords don\'t match');
+            : this.setCustomValidity('');
+        });
