@@ -4,6 +4,7 @@ import SettingsModule from './modules/SettingsModule.js';
 
 const DB_ROOT_DIR = './data/db'
 const dbPaths = {
+  sessions: `${DB_ROOT_DIR}/sessions.db`,
   settings: `${DB_ROOT_DIR}/settings.db`,
   chats: `${DB_ROOT_DIR}/chats.db`,
 };

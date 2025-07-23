@@ -4,8 +4,9 @@ html(lang="en")
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title Jason's AI Place
-    link(rel="stylesheet" href="/static/styles/layout.css")
-    script(src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4")
+    link(rel="stylesheet" href="/static/styles/tailwind.min.css")
+    link(rel="stylesheet" href="/static/styles/shared.css")
+    link(rel="stylesheet" href="/static/styles/root.css")
   body(class="min-h-screen bg-gray-900 text-gray-200 relative")
     .flex.min-h-screen 
       aside(class="w-64 bg-gray-800 p-4")
@@ -21,7 +22,8 @@ html(lang="en")
       iframe#main-frame(
         src=iframePage
         class="flex-1 h-full border-0 bg-transparent",
-        name="main"
+        style="height: 100vh"
+        name="main",
       )
       script.
         const links = document.querySelectorAll('a[target="main"]');

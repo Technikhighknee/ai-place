@@ -1,107 +1,47 @@
-section#chat.flex.flex-col.items-center.justify-start.space-y-4.pb-32
-  .w-full.max-w-2xl.space-y-2
-    each message in chat.messages 
-      .p-4.rounded-md(
-        class=message.role === 'user' ? 'bg-gray-800 text-right shadow-inner' : 'bg-gray-700 text-left'
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    script(src="/socket.io/socket.io.js")
+    link(rel="stylesheet" href="/static/styles/tailwind.min.css")
+    link(rel="stylesheet" href="/static/styles/shared.css")
+    link(rel="stylesheet" href="/static/styles/chat.css")
+  body
+    if chat == undefined
+      - chat = { messages: [] }
+    section#chat.flex.flex-col.items-center.justify-start.space-y-4.pb-32
+      .w-full.max-w-2xl.space-y-2
+        each message in chat.messages 
+          .message-wrapper.flex.w-full(
+            class=message.role === 'user' ? 'justify-end' : 'justify-start'
+          )
+            if (message.role === 'user')
+              .message-bubble.p-4.rounded-lg.shadow-md.bg-gray-700.text-white.self-end.max-w-xs
+                p.text-sm.text-gray-400 #{message.role}
+                p.text-base= message.content
+            else
+              p.text-sm.text-gray-400 #{message.role}
+              p.text-base= message.content
+    if chat.id 
+      - formAction = "/chat/" + chat.id
+    else 
+      - formAction = "/chat"
+
+    section
+      form#chatForm(
+        method="post",
+        class="fixed bottom-0 left-0 w-full bg-gray-900 p-4 shadow-lg z-10 max-w-2xl mx-auto flex items-center space-x-4",
+        data-chat-id=chat.id || '',
+        style="max-width: 100vw; width: 100%;"
       )
-        p.text-sm.text-gray-400 #{message.role}
-        p.text-base.text-gray-100= message.content
-
-if chat 
-  - formAction = "/chat/" + chat.id
-else 
-  - formAction = "/chat"
-
-form#chatForm(
-  action=formAction,
-  method="post",
-  class="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-2xl z-10"
-)
-  if chat
-    input(type="hidden" name="chat_id" value=chat.id)
-  input#messageInput(
-    type="text",
-    name="message",
-    placeholder="Type your message…",
-    required=true,
-    autocomplete="off",
-    class="w-full p-4 rounded-md bg-gray-100 text-gray-900 shadow-lg outline-none"
-  )
-script.
-  const form = document.getElementById('chatForm');
-  const input = document.getElementById('messageInput');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const message = input.value.trim();
-    if(!message) return;
-
-    const response = await fetch(e.action, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-    });
-
-    if (!response.ok) {
-      alert('There was an error: Failed to send message. See console for more info');
-      console.error(`[handleChatMessage] ${response.body.error}`);
-      return
-    }
-
-    appendUserMessage(message);
-    appendAIResponse();
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    let buffer = '';
-    let finalResponse = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      const chunks = buffer.split('\n\n');
-      buffer = chunks.pop();
-      for (const chunk of chunks) {
-        if (chunk.startsWith('data:')) {
-          const data = JSON.parse(chunk.replace('data:', ''));
-          finalResponse += data.message.content;
-        }
-      }
-      updateAIResponse(finalResponse);
-    }
-
-    input.value = '';
-  });
-
-  function createMessage(message, role) {
-    const outerElement = document.createElement('div');
-    const innerElement = document.createElement('p');
-
-    innerElement.textContent = message;
-    innerElement.className = 'text-base text-gray-100';
-    outerElement.className = role === 'user' 
-      ? 'p-4 rounded-md bg-gray-800 text-right shadow-inner message--user'
-      : 'p-4 rounded-md bg-gray-700 text-left message--ai';
-  
-    outerElement.appendChild(innerElement);
-    return outerElement;
-  }
-
-  function appendUserMessage(message) {
-    const chat = document.getElementById('chat');
-    const messageElement = createMessage(message, 'user');
-    chat.appendChild(messageElement);
-  }
-
-  function appendAIResponse() {
-    const chat = document.getElementById('chat');
-    const messageElement = createMessage('');
-    chat.appendChild(messageElement);
-  }
-
-  function updateAIResponse(message) {
-    const messageElement = document.querySelector('#chat .message--ai:last-child p');
-    messageElement.textContent = message;
-  }
+        if chat
+          input(type="hidden" name="chat_id" value=chat.id)
+        input#messageInput(
+          type="text",
+          name="message",
+          placeholder="Type your message…",
+          required=true,
+          autocomplete="off",
+          class="w-full p-4 rounded-md bg-gray-200 text-gray-900 shadow-lg outline-none",
+        )
+    script(src="/static/scripts/chat.js")

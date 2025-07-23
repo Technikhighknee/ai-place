@@ -1,8 +1,9 @@
 import http from 'http';
 import https from 'https';
 import app from './app.js';
+import { setupSocketIO } from './io.js';
 import { execSync } from 'child_process';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 
 const HTTP_PORT = 20080;
 const HTTPS_PORT = 20443;
@@ -42,3 +43,5 @@ const httpRedirectServer = http.createServer(redirectHandler);
 
 httpsServer.listen(HTTPS_PORT, logOrThrow('https'));
 httpRedirectServer.listen(HTTP_PORT, logOrThrow('http'));
+
+setupSocketIO(httpsServer);

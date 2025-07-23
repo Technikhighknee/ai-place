@@ -5,15 +5,33 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title Jason's AI Place
     link(rel="stylesheet" href="/static/styles/login.css")
-    script(src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4")
+    link(rel="stylesheet" href="/static/styles/shared.css")
+    link(rel="stylesheet" href="/static/styles/tailwind.min.css")
   body 
-    form(action="/auth/login" method="post")
-      label(for="password") Password 
-      input(type="password" name="password" required)
+    form(
+      action="/auth/login", 
+      method="POST",
+      class="flex flex-col items-center justify-center h-screen space-y-4"
+    )
+      h1.text-3xl.font-bold Login
+      if error
+        p.text-red-500= error
+      input(
+        type="password", 
+        name="password", 
+        placeholder="Password",
+        class="w-64 p-2 rounded-md bg-gray-200 text-gray-900 shadow-lg outline-none", 
+        required
+      )
       if (firstTime)
-        label(for="confirmPassword") Confirm password
-        input#confirmPassword(type="password" name="confirmPassword" required)   
-      input(type="submit" value="Submit")
+        input#confirmPassword(
+          type="password", 
+          name="confirmPassword",
+          placeholder="Confirm Password",
+          class="w-64 p-2 rounded-md bg-gray-200 text-gray-900 shadow-lg outline-none",  
+          required
+        )
+      input(type="submit", value="Submit", class="w-64 p-2 rounded-md bg-blue-500 text-white shadow-lg cursor-pointer hover:bg-blue-600")
     if firstTime
       script.
         document.getElementById('confirmPassword').addEventListener('input',

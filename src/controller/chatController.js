@@ -1,5 +1,6 @@
 import db from '../DB/index.js';
-import ai from '../AI/index.js';
+import { callLanguageModel } from '../AI/index.js';
+import { emit } from '../io.js';
 
 function createChat(request) {
   const title = request.body.title?.trim() || null;
@@ -14,7 +15,7 @@ export async function handleChatMessage(request, response) {
   let model;
 
   if (!db.settings.has('model')) {
-    model = 'deepseek-r1';
+    model = 'qwen3';
     db.settings.set('model', model);
   } else {
     model = db.settings.get('model').model;
@@ -32,35 +33,30 @@ export async function handleChatMessage(request, response) {
       error: 'chat_id does not exist'
     });
     return;
-  } else {
-    request.chat_id = chat_id;
   }
 
-  // save user message and prepare context
-  db.chats.saveMessage(request.chat_id, 'user', message);
-
-  response.setHeader('Content-Type', 'text/event-stream');
-  response.setHeader('Cache-Control', 'no-cache');
-  response.setHeader('Connection', 'keep-alive');
+  db.chats.saveMessage(chat_id, 'user', message);
 
   const messages = db.chats
-    .getMessages(request.chat_id)
+    .getMessages(chat_id)
     .map(({ role, content }) => ({ role, content }));
-  let fullResponse = '';
 
-  const stream = ai.chat({
-    stream: true,
-    model,
-    messages,
+  response.setHeader('Content-Type', 'application/json');
+  response.status(200).json({ message: 'Message received.' });
+
+  const stream = await callLanguageModel({
+    messages, model,
+    provider: 'ollama', stream: true
   });
 
+  let fullAIResponse = '';
   for await (const chunk of stream) {
-    fullResponse += chunk.message.content;
-    response.write(`data: ${JSON.stringify(chunk)}\n\n`);
+    if (chunk.type === 'response.output_text.delta') {
+      fullAIResponse += chunk.delta;
+      emit(request.session.id, 'messageChunk', { delta: chunk.delta, chat_id });
+    }
   }
 
-  db.chats.saveMessage(request.chat_id, 'assistant', fullResponse);
-
-  response.write('event: end\ndata: [DONE]\n\n');
-  response.end();
+  db.chats.saveMessage(chat_id, 'assistant', fullAIResponse);
+  emit(request.session.id, 'messageFinal', { fullText: fullAIResponse, chat_id });
 }

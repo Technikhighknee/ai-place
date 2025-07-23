@@ -46,6 +46,12 @@ export async function handleLogin(request, response) {
   return;
 }
 
+export function handleLogout(request, response) {
+  request.session.isAuthenticated = false;
+  request.session.save();
+  response.redirect('/auth/login');
+}
+
 export async function handleSetPassword(request, response) {
   const { salt, password } = db.settings.get('salt', 'password');
   const { oldPassword, newPassword } = request.body;
