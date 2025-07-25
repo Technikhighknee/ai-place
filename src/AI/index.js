@@ -1,6 +1,6 @@
-// server/src/ai/callLanguageModel.js
-const DEFAULT_MODEL = process.env.DEFAULT_LLM_MODEL || 'deepseek-r1';
-const DEFAULT_PROVIDER = process.env.DEFAULT_LLM_PROVIDER || 'ollama';
+import db from '../DB/index.js';
+const DEFAULT_MODEL = db.settings.get('model');
+const DEFAULT_PROVIDER = db.settings.get('provider');
 
 export async function callLanguageModel({
   messages = [],
