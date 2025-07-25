@@ -7,7 +7,7 @@ export async function callLocalModel({
   model = process.env.DEFAULT_MODEL || 'qwen3',
   temperature = 0.7,
   stream = false,
-  keepAlive = '0',
+  keep_alive = '0',
   format = null,
   abortSignal = null,
   raw = false
@@ -17,13 +17,13 @@ export async function callLocalModel({
   }
 
   if (stream) {
-    return await callStreaming({ fullMessages: messages, model, temperature, keepAlive, abortSignal, format, raw });
+    return await callStreaming({ fullMessages: messages, model, temperature, keep_alive, abortSignal, format, raw });
   }
 
-  return await callNonStreaming({ fullMessages: messages, model, temperature, keepAlive, format, raw });
+  return await callNonStreaming({ fullMessages: messages, model, temperature, keep_alive, format, raw });
 }
 
-async function callStreaming({ fullMessages, model, temperature, keepAlive, abortSignal, format, raw }) {
+async function callStreaming({ fullMessages, model, temperature, keep_alive, abortSignal, format, raw }) {
   const controller = new AbortController();
 
   const response = await fetch(`${BASE_URL}/api/chat`, {
@@ -34,7 +34,8 @@ async function callStreaming({ fullMessages, model, temperature, keepAlive, abor
       messages: fullMessages,
       temperature,
       stream: true,
-      keep_alive: keepAlive,
+      think: false,
+      keep_alive,
       format,
       raw
     }),
@@ -53,6 +54,7 @@ async function callNonStreaming({ fullMessages, model, temperature, keepAlive, f
       messages: fullMessages,
       temperature,
       stream: false,
+      think: false,
       keep_alive: keepAlive,
       format,
       raw
