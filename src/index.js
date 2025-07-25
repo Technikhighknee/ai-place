@@ -4,16 +4,16 @@ isSetupNeeded() ? await setup() : null;
 import http from 'http';
 import https from 'https';
 import app from './app.js';
-import { setupSocketIO } from './io.js';
-import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
+import { execSync } from 'child_process';
+import { setupSocketIO } from './io.js';
 
 const HTTP_PORT = 20080;
 const HTTPS_PORT = 20443;
 
 const certPath = `./data/certificates`;
-const keyFile = `${certPath}/key.pem`;
 const certFile = `${certPath}/cert.pem`;
+const keyFile = `${certPath}/key.pem`;
 
 function ensureCert() {
   if (existsSync(keyFile) && existsSync(certFile)) return;

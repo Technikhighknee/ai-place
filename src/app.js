@@ -13,7 +13,7 @@ app.set('views', `${import.meta.dirname}/views/`)
 app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use('/static/', express.static(`${import.meta.dirname}/public/`));
@@ -30,4 +30,5 @@ app.post(['/chat', '/chat/:chat_id'], isAuthenticated, handleChatMessage);
 app.post('/auth/login', isNotAuthenticated, handleLogin);
 
 app.all('/auth/logout', isAuthenticated, handleLogout);
+
 export default app;
