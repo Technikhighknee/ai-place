@@ -10,16 +10,9 @@ function createChat(request) {
 }
 
 export async function handleChatMessage(request, response) {
+  const model = request.body.model || db.settings.get('model');
   const message = request.body.message.trim();
   let chat_id = request.params.chat_id || null;
-  let model;
-
-  if (!db.settings.has('model')) {
-    model = 'qwen3';
-    db.settings.set('model', model);
-  } else {
-    model = db.settings.get('model').model;
-  }
 
   if (!(message.length > 0)) {
     response.status(400).json({ error: 'Message can not be empty.' });
@@ -35,20 +28,16 @@ export async function handleChatMessage(request, response) {
     return;
   }
 
-  db.chats.saveMessage(chat_id, 'user', message);
-
-  const messages = db.chats
-    .getMessages(chat_id)
-    .map(({ role, content }) => ({ role, content }));
-
+  const messages = buildMessagesArray(chat_id, message);
+  
   response.setHeader('Content-Type', 'application/json');
   response.status(200).json({ message: 'Message received.' });
-
+  
   const stream = await callLanguageModel({
     messages, model,
     provider: 'ollama', stream: true
   });
-
+  
   let fullAIResponse = '';
   for await (const chunk of stream) {
     if (chunk.type === 'response.output_text.delta') {
@@ -56,7 +45,30 @@ export async function handleChatMessage(request, response) {
       emit(request.session.id, 'messageChunk', { delta: chunk.delta, chat_id });
     }
   }
-
+  
+  db.chats.saveMessage(chat_id, 'user', message);
   db.chats.saveMessage(chat_id, 'assistant', fullAIResponse);
   emit(request.session.id, 'messageFinal', { fullText: fullAIResponse, chat_id });
+}
+
+function buildMessagesArray(chat_id, message) {
+  const messages = [];
+  const systemPrompt = db.settings.get('systemPrompt');
+
+  messages.push({ role: 'system', content: systemPrompt });
+
+  db.chats.getMessages(chat_id)
+    .forEach(message => {
+      messages.push({
+        role: message.role,
+        content: message.content,
+      });
+    })
+
+  messages.push({
+    role: 'user',
+    content: message.trim()
+  });
+  
+  return messages;
 }

@@ -15,6 +15,7 @@ export function isNotAuthenticated(request, response, next) {
 
 export async function handleLogin(request, response) {
   const { password } = request.body;
+  const passwordHash = getPasswordHash();
   
   if (!password) {
     request.session.error = 'Password can not be empty.';
@@ -22,15 +23,14 @@ export async function handleLogin(request, response) {
     response.redirect('/auth/login');
     return;
   }
-  
-  if (!db.settings.has('password')) {
+
+  if (passwordHash == null) {
     request.body.newPassword = password;
     handleSetPassword(request, response);
     return;
   }
-  
-  const { password: currentPassword } = db.settings.get('password');
-  const doesMatch = await bcrypt.compare(password, currentPassword);
+
+  const doesMatch = await bcrypt.compare(password, passwordHash);
 
   if (!doesMatch) {
     request.session.error = 'Password does not match.';
@@ -53,29 +53,29 @@ export function handleLogout(request, response) {
 }
 
 export async function handleSetPassword(request, response) {
-  const { salt, password } = db.settings.get('salt', 'password');
   const { oldPassword, newPassword } = request.body;
-  const DEFAULT_SALT = 10;
-  let realSalt;
+  const passwordHash = getPasswordHash();
 
-  if (!salt) {
-    db.settings.set('salt', DEFAULT_SALT);
-    realSalt = DEFAULT_SALT;
-  }
-  else realSalt = salt;
-
-  if (!password) {
-    db.settings.set('password', await bcrypt.hash(newPassword, realSalt));
+  if (!passwordHash) {
+    await setPassword(newPassword);
+    request.session.error = null;
     request.session.isAuthenticated = true;
     request.session.save();
     response.redirect('/');
     return;
   }
 
-  if (!(await bcrypt.compare(oldPassword, password))) {
-    response.status(400).json({ error: 'Old password does not match.' });
-    return;
-  }
+  const doesMatch = await bcrypt.compare(oldPassword, passwordHash);
+  if (!doesMatch) return; // not sure how to handle settings yet; will come back to this
 
-  db.settings.set('password', await bcrypt.hash(newPassword, realSalt));
+  await setPassword(newPassword);
+}
+
+function getPasswordHash() {
+  return db.settings.get('passwordHash');
+}
+
+async function setPassword(password) {
+  const salt = db.settings.get('salt');
+  db.settings.set('passwordHash', await bcrypt.hash(password, salt));
 }

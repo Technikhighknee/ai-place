@@ -1,3 +1,10 @@
+* {
+  box-sizing: border-box;
+  scrollbar-color: #444 #222;
+  scrollbar-width: thin;
+}
+
 body {
   font-family: neo-sans, sans-serif;
+  overflow: hidden;
 }

@@ -24,6 +24,9 @@ export default class {
     `);
 
     const rows = statement.all(...keys);
+    if (rows.length === 1) {
+      return JSON.parse(rows[0].value);
+    }
     return Object.fromEntries(rows.map(({ key, value }) => [key, JSON.parse(value)]));
   }
 

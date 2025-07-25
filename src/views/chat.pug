@@ -6,42 +6,49 @@ html(lang="en")
     link(rel="stylesheet" href="/static/styles/tailwind.min.css")
     link(rel="stylesheet" href="/static/styles/shared.css")
     link(rel="stylesheet" href="/static/styles/chat.css")
+    link(rel="stylesheet" href="/static/styles/root.css")
   body
-    if chat == undefined
-      - chat = { messages: [] }
-    section#chat.flex.flex-col.items-center.justify-start.space-y-4.pb-32
-      .w-full.max-w-2xl.space-y-2
-        each message in chat.messages 
-          .message-wrapper.flex.w-full(
-            class=message.role === 'user' ? 'justify-end' : 'justify-start'
+    .flex.min-h-screen
+      aside(class="w-64 bg-gray-800 p-4")
+        nav(class="flex flex-col space-y-2")
+          a(href="/chat" class="font-bold text-blue-400 hover:underline") New Chat 
+          hr(class="my-2 border-gray-600")
+          each chat in chats 
+            a(
+              href=`/chat/${chat.id}`,
+              target="main",
+              class="text-gray-300 hover:text-white truncate"
+            ) #{chat.title || 'Untitled Chat'}
+      if chat == undefined
+        - chat = { messages: [] }
+      main
+        section#chat
+          #chatMessages
+            each message in chat.messages 
+              .message-wrapper
+                if (message.role === 'user')
+                  .user-message
+                    p.message--role #{message.role}
+                    p.message--content= message.content
+                else
+                  .ai-message
+                    p.message--role #{message.role}
+                    p.message--content= message.content
+        if chat.id 
+          - formAction = "/chat/" + chat.id
+        else 
+          - formAction = "/chat"
+        section
+          form#chatForm(
+            method="post",
+            data-chat-id=chat.id || ''
           )
-            if (message.role === 'user')
-              .message-bubble.p-4.rounded-lg.shadow-md.bg-gray-700.text-white.self-end.max-w-xs
-                p.text-sm.text-gray-400 #{message.role}
-                p.text-base= message.content
-            else
-              p.text-sm.text-gray-400 #{message.role}
-              p.text-base= message.content
-    if chat.id 
-      - formAction = "/chat/" + chat.id
-    else 
-      - formAction = "/chat"
-
-    section
-      form#chatForm(
-        method="post",
-        class="fixed bottom-0 left-0 w-full bg-gray-900 p-4 shadow-lg z-10 max-w-2xl mx-auto flex items-center space-x-4",
-        data-chat-id=chat.id || '',
-        style="max-width: 100vw; width: 100%;"
-      )
-        if chat
-          input(type="hidden" name="chat_id" value=chat.id)
-        input#messageInput(
-          type="text",
-          name="message",
-          placeholder="Type your message…",
-          required=true,
-          autocomplete="off",
-          class="w-full p-4 rounded-md bg-gray-200 text-gray-900 shadow-lg outline-none",
-        )
+            if chat
+              input(type="hidden" name="chat_id" value=chat.id)
+            textarea#messageInput(
+              name="message",
+              placeholder="Type your message…",
+              required=true,
+              autocomplete="off",
+            )
     script(src="/static/scripts/chat.js")

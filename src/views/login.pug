@@ -7,13 +7,13 @@ html(lang="en")
     link(rel="stylesheet" href="/static/styles/login.css")
     link(rel="stylesheet" href="/static/styles/shared.css")
     link(rel="stylesheet" href="/static/styles/tailwind.min.css")
-  body 
+  body.bg-gray-900 
     form(
       action="/auth/login", 
       method="POST",
       class="flex flex-col items-center justify-center h-screen space-y-4"
     )
-      h1.text-3xl.font-bold Login
+      h1.text-3xl.font-bold.text-white Login
       if error
         p.text-red-500= error
       input(

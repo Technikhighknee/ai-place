@@ -6,6 +6,15 @@ const formAction = chatId ? `/chat/${chatId}` : '/chat';
 
 let currentAIResponseElement = null;
 
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (input.value.trim()) {
+      form.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+  }
+});
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const message = input.value.trim();
@@ -32,17 +41,20 @@ socket.on('messageFinal', ({ chat_id, fullText }) => {
 });
 
 function createMessage(message, role) {
-  const outerElement = document.createElement('div');
-  const innerElement = document.createElement('p');
+  const div = document.createElement('div');
+  const roleElement = document.createElement('p');
+  const contentElement = document.createElement('p');
 
-  innerElement.textContent = message;
-  innerElement.className = 'text-base text-gray-100';
-  outerElement.className = role === 'user'
-    ? 'p-4 rounded-md bg-gray-800 shadow-inner message--user'
-    : 'p-4 rounded-md bg-gray-700 message--ai';
+  roleElement.textContent = role === 'user' ? 'user' : 'assistant';
+  contentElement.textContent = message;
+  
+  div.className = role === 'user' ? 'user-message' : 'ai-message';
+  roleElement.className = 'message--role';
+  contentElement.className = 'message--content';
 
-  outerElement.appendChild(innerElement);
-  return outerElement;
+  div.appendChild(roleElement);
+  div.appendChild(contentElement);
+  return div;
 }
 
 function appendUserMessage(message) {
@@ -59,7 +71,7 @@ function appendAIResponse() {
 }
 
 function updateAIResponse(chunk) {
-  const messageElement = document.querySelector('.message--ai:last-child');
-  const innerElement = messageElement.querySelector('p');
-  innerElement.textContent += chunk;
+  const messageElement = document.querySelector('.ai-message:last-child');
+  const contentElement = messageElement.querySelector('.message--content');
+  contentElement.textContent += chunk;
 }

@@ -1,3 +1,6 @@
+import { isSetupNeeded, setup } from './setup/index.js';
+isSetupNeeded() ? await setup() : null;
+
 import http from 'http';
 import https from 'https';
 import app from './app.js';

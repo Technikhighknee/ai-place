@@ -3,12 +3,12 @@ import db from "../DB/index.js";
 function render(response, target, data = {}) {
   response.render(target, Object.assign(data, { 
     settings: db.settings.getAll(),
+    chats: db.chats.listChats(),
   }));
 }
 
 export function renderRoot(request, response) {
-  const chats = db.chats.listChats();
-  render(response, 'root', { chats, iframePage: '/chat' });
+  render(response, 'chat');
 }
 
 export function renderLogin(request, response) {
@@ -16,7 +16,7 @@ export function renderLogin(request, response) {
   delete request.session.error;
   render(response, 'login', {
     error,
-    firstTime: !db.settings.has('password'),
+    firstTime: !db.settings.get('passwordHash'),
   });
 }
 
