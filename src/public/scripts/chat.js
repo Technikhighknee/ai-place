@@ -1,10 +1,9 @@
 const socket = io();
 const form = document.getElementById('chatForm');
 const input = document.getElementById('messageInput');
-const chatId = form.dataset.chatId || null;
-const formAction = chatId ? `/chat/${chatId}` : '/chat';
+let chatId = form.dataset.chatId || null;
+let formAction = chatId ? `/chat/${chatId}` : '/chat';
 
-let currentAIResponseElement = null;
 
 input.addEventListener('keypress', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -37,7 +36,10 @@ socket.on('messageChunk', ({ chat_id, delta }) => {
 });
 
 socket.on('messageFinal', ({ chat_id, fullText }) => {
+  chatId = chat_id;
+  formAction = `/chat/${chat_id}`;
   input.disabled = false;
+  input.focus();
 });
 
 function createMessage(message, role) {
@@ -66,7 +68,6 @@ function appendUserMessage(message) {
 function appendAIResponse() {
   const chat = document.getElementById('chat');
   const messageElement = createMessage('');
-  currentAIResponseElement = messageElement;
   chat.appendChild(messageElement);
 }
 

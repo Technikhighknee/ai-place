@@ -16,17 +16,24 @@ export default class {
 
   get(...keys) {
     if (keys.length === 0) return {};
+    if (keys.length === 1) return this.getOne(keys[0]);
+    return this.getMany(...keys);
+  }
 
+  getOne(key) {
+    const row = this.db.prepare(`SELECT value FROM settings WHERE key = ?`).get(key);
+    if (!row) return null;
+    return JSON.parse(row.value);
+  }
+
+  getMany(...keys) {
+    if (keys.length === 0) return {};
     const placeholders = keys.map(() => '?').join(', ');
     const statement = this.db.prepare(`
       SELECT key, value FROM settings
       WHERE key IN (${placeholders})  
     `);
-
     const rows = statement.all(...keys);
-    if (rows.length === 1) {
-      return JSON.parse(rows[0].value);
-    }
     return Object.fromEntries(rows.map(({ key, value }) => [key, JSON.parse(value)]));
   }
 

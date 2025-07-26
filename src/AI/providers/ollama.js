@@ -45,7 +45,7 @@ async function callStreaming({ fullMessages, model, temperature, keep_alive, abo
   return parseStream(response.body, controller);
 }
 
-async function callNonStreaming({ fullMessages, model, temperature, keepAlive, format, raw }) {
+async function callNonStreaming({ fullMessages, model, temperature, keep_alive, format, raw }) {
   const response = await fetch(`${BASE_URL}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -55,7 +55,7 @@ async function callNonStreaming({ fullMessages, model, temperature, keepAlive, f
       temperature,
       stream: false,
       think: false,
-      keep_alive: keepAlive,
+      keep_alive: keep_alive,
       format,
       raw
     })
