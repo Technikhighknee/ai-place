@@ -1,2 +1,2 @@
-GUESSWARE!
+GUESSWARE!  
 needs ollama
